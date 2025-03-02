@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "380486269565",
+    "project_id": "thunderdoctor-6c47b",
+    "storage_bucket": "thunderdoctor-6c47b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:380486269565:android:90d277e1688deb5def8f14",
+        "android_client_info": {
+          "package_name": "com.example.citas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "380486269565-dfm1pu5mr2c3jqgt5cglktm85i0r1u4s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwL0almHcNzZLoNJ2nxhTnkXjTJFEdjf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "380486269565-dfm1pu5mr2c3jqgt5cglktm85i0r1u4s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "380486269565-6hkmkhvt7jpcdvv2232rh9hgb8rlmmcr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.citas"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:380486269565:android:3fe856019d6c462cef8f14",
+        "android_client_info": {
+          "package_name": "com.monkeysoft.thunderdoctor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "380486269565-dfm1pu5mr2c3jqgt5cglktm85i0r1u4s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwL0almHcNzZLoNJ2nxhTnkXjTJFEdjf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "380486269565-dfm1pu5mr2c3jqgt5cglktm85i0r1u4s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "380486269565-6hkmkhvt7jpcdvv2232rh9hgb8rlmmcr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.citas"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
