@@ -163,7 +163,7 @@ class DoctorHomeScreen extends StatelessWidget {
           const SizedBox(height: 20),
           StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
-                .collection('users')
+                .collection('usuarios')
                 .doc(user?.uid)
                 .snapshots(),
             builder: (context, snapshot) {

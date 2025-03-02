@@ -203,7 +203,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     }
 
     User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Usuario no autenticado")),
+      );
+      return;
+    }
 
     String finalDoctorId = selectedDoctor ?? widget.doctorId!;
 

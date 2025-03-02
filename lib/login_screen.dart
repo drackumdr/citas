@@ -11,18 +11,24 @@ class LoginScreen extends StatelessWidget {
   Future<void> checkUserRole(BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(user.uid)
-          .get();
-      if (doc.exists) {
-        String role = doc['rol'];
+      try {
+        DocumentSnapshot doc = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .get();
+        if (doc.exists) {
+          String role = doc['rol'];
 
-        if (role == "doctor") {
-          Navigator.pushReplacementNamed(context, '/doctor_dashboard');
-        } else {
-          Navigator.pushReplacementNamed(context, '/patient_dashboard');
+          if (role == "doctor") {
+            Navigator.pushReplacementNamed(context, '/doctor_dashboard');
+          } else {
+            Navigator.pushReplacementNamed(context, '/patient_dashboard');
+          }
         }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al obtener el rol del usuario: $e")),
+        );
       }
     }
   }
