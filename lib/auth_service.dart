@@ -32,36 +32,39 @@ class AuthService {
       }
 
       User? user = userCredential.user;
-      if (user != null) {
-        // Verificar si el usuario ya existe en Firestore
-        DocumentSnapshot userDoc =
-            await _firestore.collection('usuarios').doc(user.uid).get();
-
-        if (!userDoc.exists) {
-          // Solo crear el documento si no existe el usuario
-          await _firestore.collection('usuarios').doc(user.uid).set({
-            'uid': user.uid,
-            'nombre': user.displayName,
-            'email': user.email,
-            'especialidad': null, // Deberá ser actualizado después
-            'telefono': null, // Deberá ser actualizado después
-            'direccion': null, // Deberá ser actualizado después
-            'horario': {
-              'lunes': [],
-              'martes': [],
-              'miércoles': [],
-              'jueves': [],
-              'viernes': [],
-              'sábado': [],
-              'domingo': []
-            },
-            'foto': user.photoURL,
-            'rol': 'paciente', // Por defecto es paciente
-            'fechaRegistro': FieldValue.serverTimestamp(),
-          });
-        }
-        // Si ya existe, conservamos sus datos incluyendo el rol
+      if (user == null) {
+        return null;
       }
+
+      // Verificar si el usuario ya existe en Firestore
+      DocumentSnapshot userDoc =
+          await _firestore.collection('usuarios').doc(user.uid).get();
+
+      if (!userDoc.exists) {
+        // Solo crear el documento si no existe el usuario
+        await _firestore.collection('usuarios').doc(user.uid).set({
+          'uid': user.uid,
+          'nombre': user.displayName,
+          'email': user.email,
+          'especialidad': null, // Deberá ser actualizado después
+          'telefono': null, // Deberá ser actualizado después
+          'direccion': null, // Deberá ser actualizado después
+          'horario': {
+            'lunes': [],
+            'martes': [],
+            'miércoles': [],
+            'jueves': [],
+            'viernes': [],
+            'sábado': [],
+            'domingo': []
+          },
+          'foto': user.photoURL,
+          'rol': 'paciente', // Por defecto es paciente
+          'fechaRegistro': FieldValue.serverTimestamp(),
+        });
+      }
+      // Si ya existe, conservamos sus datos incluyendo el rol
+
       return user;
     } catch (e) {
       print("Error al autenticar con Google: $e");

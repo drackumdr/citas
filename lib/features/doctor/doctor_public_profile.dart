@@ -96,6 +96,8 @@ class DoctorPublicProfile extends StatelessWidget {
                         ' (${doctorData['totalCalificaciones'] ?? 0} reseñas)'),
                   ],
                 ),
+              if (doctorData['calificacion'] == null)
+                const Text('Calificación no disponible'),
             ],
           ),
         ),

@@ -67,6 +67,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
+
+      Navigator.pop(context);
     }
   }
 

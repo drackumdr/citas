@@ -111,6 +111,9 @@ class _HorarioScreenState extends State<HorarioScreen> {
       setState(() {
         _isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cargar horarios: $e')),
+      );
     }
   }
 

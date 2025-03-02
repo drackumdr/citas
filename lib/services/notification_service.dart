@@ -88,12 +88,16 @@ class NotificationService {
     if (user != null) {
       String? token = await _firebaseMessaging.getToken();
 
-      await FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(user.uid)
-          .update({
-        'fcmTokens': FieldValue.arrayUnion([token])
-      });
+      try {
+        await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .update({
+          'fcmTokens': FieldValue.arrayUnion([token])
+        });
+      } catch (e) {
+        print("Error al guardar el token FCM en Firestore: $e");
+      }
     }
   }
 
