@@ -38,9 +38,19 @@ class AppRoutes {
   }
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    if (settings.name?.startsWith('/dr-') ?? false) {
+    if (settings.name == null) {
+      return MaterialPageRoute(
+        builder: (context) => const Scaffold(
+          body: Center(
+            child: Text('Ruta no especificada'),
+          ),
+        ),
+      );
+    }
+
+    if (settings.name.startsWith('/dr-')) {
       // Extract doctor username from URL
-      final doctorUsername = settings.name!.substring(4);
+      final doctorUsername = settings.name.substring(4);
       return MaterialPageRoute(
         builder: (context) => DoctorPublicProfile(username: doctorUsername),
         settings: settings,

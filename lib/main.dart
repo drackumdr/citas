@@ -98,6 +98,12 @@ class AuthWrapper extends StatelessWidget {
                 return const CircularProgressIndicator();
               }
 
+              if (userSnapshot.hasError) {
+                return Center(
+                  child: Text("Error: ${userSnapshot.error}"),
+                );
+              }
+
               if (userSnapshot.hasData && userSnapshot.data!.exists) {
                 final userData =
                     userSnapshot.data!.data() as Map<String, dynamic>;

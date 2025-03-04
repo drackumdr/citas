@@ -38,6 +38,12 @@ class RoleBasedRedirect extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
+            if (userSnapshot.hasError) {
+              return Center(
+                child: Text("Error: ${userSnapshot.error}"),
+              );
+            }
+
             if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
               // Handle case where user exists in Auth but not in Firestore
               return const Center(

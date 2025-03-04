@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminStatsScreen extends StatefulWidget {
   const AdminStatsScreen({super.key});
@@ -527,95 +528,182 @@ class _AdminStatsScreenState extends State<AdminStatsScreen> {
   }
 
   Future<Map<String, dynamic>> _loadStatistics() async {
-    // In a real app, this would query Firestore with the selected date range
-    // For the example, let's return mock data
-    await Future.delayed(
-        const Duration(milliseconds: 500)); // Simulate network delay
+    try {
+      QuerySnapshot appointmentsSnapshot = await FirebaseFirestore.instance
+          .collection('citas')
+          .where('fecha', isGreaterThanOrEqualTo: _startDate)
+          .where('fecha', isLessThanOrEqualTo: _endDate)
+          .get();
 
-    return {
-      'revenue': 12500.75,
-      'newUsers': 128,
-      'appointments': 342,
-    };
+      QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('fechaRegistro', isGreaterThanOrEqualTo: _startDate)
+          .where('fechaRegistro', isLessThanOrEqualTo: _endDate)
+          .get();
+
+      QuerySnapshot paymentsSnapshot = await FirebaseFirestore.instance
+          .collection('pagos')
+          .where('fecha', isGreaterThanOrEqualTo: _startDate)
+          .where('fecha', isLessThanOrEqualTo: _endDate)
+          .get();
+
+      double totalRevenue = paymentsSnapshot.docs.fold(
+          0.0,
+          (sum, doc) =>
+              sum + (doc.data() as Map<String, dynamic>)['monto'] as double);
+
+      return {
+        'revenue': totalRevenue,
+        'newUsers': usersSnapshot.docs.length,
+        'appointments': appointmentsSnapshot.docs.length,
+      };
+    } catch (e) {
+      print('Error loading statistics: $e');
+      return {
+        'revenue': 0.0,
+        'newUsers': 0,
+        'appointments': 0,
+      };
+    }
   }
 
   Future<List<RevenueStat>> _loadRevenueData() async {
-    // In a real app, this would query Firestore with the selected date range
-    // For the example, let's return mock data
-    await Future.delayed(
-        const Duration(milliseconds: 800)); // Simulate network delay
+    try {
+      QuerySnapshot paymentsSnapshot = await FirebaseFirestore.instance
+          .collection('pagos')
+          .where('fecha', isGreaterThanOrEqualTo: _startDate)
+          .where('fecha', isLessThanOrEqualTo: _endDate)
+          .get();
 
-    final now = DateTime.now();
-    final startDate = _selectedPeriod == 'semana'
-        ? now.subtract(const Duration(days: 7))
-        : now.subtract(const Duration(days: 30));
+      Map<DateTime, double> revenueMap = {};
 
-    List<RevenueStat> data = [];
-    DateTime current = startDate;
+      for (var doc in paymentsSnapshot.docs) {
+        DateTime date = (doc.data() as Map<String, dynamic>)['fecha'].toDate();
+        double amount = (doc.data() as Map<String, dynamic>)['monto'] as double;
 
-    while (current.isBefore(now)) {
-      data.add(RevenueStat(
-        date: current,
-        amount: 100 + (500 * current.day / 30), // Mock revenue data
-      ));
-      current = current.add(const Duration(days: 1));
+        DateTime dateOnly = DateTime(date.year, date.month, date.day);
+        if (revenueMap.containsKey(dateOnly)) {
+          revenueMap[dateOnly] = revenueMap[dateOnly]! + amount;
+        } else {
+          revenueMap[dateOnly] = amount;
+        }
+      }
+
+      List<RevenueStat> revenueData = revenueMap.entries
+          .map((entry) => RevenueStat(date: entry.key, amount: entry.value))
+          .toList();
+
+      revenueData.sort((a, b) => a.date.compareTo(b.date));
+
+      return revenueData;
+    } catch (e) {
+      print('Error loading revenue data: $e');
+      return [];
     }
-
-    return data;
   }
 
   Future<List<UserRegistrationStat>> _loadUserRegistrationData() async {
-    // In a real app, this would query Firestore with the selected date range
-    // For the example, let's return mock data
-    await Future.delayed(
-        const Duration(milliseconds: 700)); // Simulate network delay
+    try {
+      QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('fechaRegistro', isGreaterThanOrEqualTo: _startDate)
+          .where('fechaRegistro', isLessThanOrEqualTo: _endDate)
+          .get();
 
-    final now = DateTime.now();
-    final startDate = _selectedPeriod == 'semana'
-        ? now.subtract(const Duration(days: 7))
-        : now.subtract(const Duration(days: 30));
+      Map<DateTime, Map<String, int>> registrationMap = {};
 
-    List<UserRegistrationStat> data = [];
-    DateTime current = startDate;
+      for (var doc in usersSnapshot.docs) {
+        DateTime date =
+            (doc.data() as Map<String, dynamic>)['fechaRegistro'].toDate();
+        String role = (doc.data() as Map<String, dynamic>)['rol'];
 
-    while (current.isBefore(now)) {
-      data.add(UserRegistrationStat(
-        date: current,
-        doctors: (current.day % 5), // Mock doctor registrations
-        patients: (current.day % 10) + 1, // Mock patient registrations
-      ));
-      current = current.add(const Duration(days: 1));
+        DateTime dateOnly = DateTime(date.year, date.month, date.day);
+        if (!registrationMap.containsKey(dateOnly)) {
+          registrationMap[dateOnly] = {'doctor': 0, 'paciente': 0};
+        }
+
+        if (role == 'doctor') {
+          registrationMap[dateOnly]!['doctor'] =
+              registrationMap[dateOnly]!['doctor']! + 1;
+        } else if (role == 'paciente') {
+          registrationMap[dateOnly]!['paciente'] =
+              registrationMap[dateOnly]!['paciente']! + 1;
+        }
+      }
+
+      List<UserRegistrationStat> registrationData = registrationMap.entries
+          .map((entry) => UserRegistrationStat(
+                date: entry.key,
+                doctors: entry.value['doctor']!,
+                patients: entry.value['paciente']!,
+              ))
+          .toList();
+
+      registrationData.sort((a, b) => a.date.compareTo(b.date));
+
+      return registrationData;
+    } catch (e) {
+      print('Error loading user registration data: $e');
+      return [];
     }
-
-    return data;
   }
 
   Future<List<AppointmentStat>> _loadAppointmentData() async {
-    // In a real app, this would query Firestore with the selected date range
-    // For the example, let's return mock data
-    await Future.delayed(
-        const Duration(milliseconds: 600)); // Simulate network delay
+    try {
+      QuerySnapshot appointmentsSnapshot = await FirebaseFirestore.instance
+          .collection('citas')
+          .where('fecha', isGreaterThanOrEqualTo: _startDate)
+          .where('fecha', isLessThanOrEqualTo: _endDate)
+          .get();
 
-    final now = DateTime.now();
-    final startDate = _selectedPeriod == 'semana'
-        ? now.subtract(const Duration(days: 7))
-        : now.subtract(const Duration(days: 30));
+      Map<DateTime, Map<String, int>> appointmentMap = {};
 
-    List<AppointmentStat> data = [];
-    DateTime current = startDate;
+      for (var doc in appointmentsSnapshot.docs) {
+        DateTime date = (doc.data() as Map<String, dynamic>)['fecha'].toDate();
+        String status = (doc.data() as Map<String, dynamic>)['estado'];
 
-    while (current.isBefore(now)) {
-      data.add(AppointmentStat(
-        date: current,
-        confirmed: (current.day % 8) + 2, // Mock confirmed appointments
-        canceled: (current.day % 4), // Mock canceled appointments
-        pending: (current.day % 5) + 1, // Mock pending appointments
-        completed: (current.day % 7) + 3, // Mock completed appointments
-      ));
-      current = current.add(const Duration(days: 1));
+        DateTime dateOnly = DateTime(date.year, date.month, date.day);
+        if (!appointmentMap.containsKey(dateOnly)) {
+          appointmentMap[dateOnly] = {
+            'confirmada': 0,
+            'cancelada': 0,
+            'pendiente': 0,
+            'completada': 0,
+          };
+        }
+
+        if (status == 'confirmada') {
+          appointmentMap[dateOnly]!['confirmada'] =
+              appointmentMap[dateOnly]!['confirmada']! + 1;
+        } else if (status == 'cancelada') {
+          appointmentMap[dateOnly]!['cancelada'] =
+              appointmentMap[dateOnly]!['cancelada']! + 1;
+        } else if (status == 'pendiente') {
+          appointmentMap[dateOnly]!['pendiente'] =
+              appointmentMap[dateOnly]!['pendiente']! + 1;
+        } else if (status == 'completada') {
+          appointmentMap[dateOnly]!['completada'] =
+              appointmentMap[dateOnly]!['completada']! + 1;
+        }
+      }
+
+      List<AppointmentStat> appointmentData = appointmentMap.entries
+          .map((entry) => AppointmentStat(
+                date: entry.key,
+                confirmed: entry.value['confirmada']!,
+                canceled: entry.value['cancelada']!,
+                pending: entry.value['pendiente']!,
+                completed: entry.value['completada']!,
+              ))
+          .toList();
+
+      appointmentData.sort((a, b) => a.date.compareTo(b.date));
+
+      return appointmentData;
+    } catch (e) {
+      print('Error loading appointment data: $e');
+      return [];
     }
-
-    return data;
   }
 }
 

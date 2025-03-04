@@ -178,6 +178,10 @@ class _DoctorProfileEditorState extends State<DoctorProfileEditor> {
         'educacion': _educacionList,
         if (imageUrl != null) 'foto': imageUrl,
         'perfilCompletado': true,
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar perfil: $error')),
+        );
       });
 
       setState(() {

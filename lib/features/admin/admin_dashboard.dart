@@ -194,6 +194,10 @@ class AdminHomePage extends StatelessWidget {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('usuarios').snapshots(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error al cargar datos'));
+        }
+
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -267,6 +271,10 @@ class AdminHomePage extends StatelessWidget {
                           DateTime.now().add(const Duration(days: 7))))
                   .snapshots(),
               builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error al cargar datos'));
+                }
+
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -328,6 +336,10 @@ class AdminHomePage extends StatelessWidget {
                   .limit(5)
                   .snapshots(),
               builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error al cargar datos'));
+                }
+
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
